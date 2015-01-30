@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
 project (RS++)
-include("FindROOT.cmake") 
 
 # The version number.
 set (RS_VERSION_MAJOR 1)
