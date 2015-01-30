@@ -1,0 +1,1 @@
+add_library(RSShellModel SHARED RSShellModelState.h RSShellModelState.cxx RSShellModelCollection.h RSShellModelCollection.cxx)
