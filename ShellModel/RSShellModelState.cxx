@@ -98,7 +98,7 @@ double ShellModelState::GetOrbitalS(unsigned int i){
 
 ////////////////////////////////////////////////////////////////////////////////
 unsigned int ShellModelState::GetMainOrbital(){
-  unsigned int orbital = 1000;
+  unsigned int orbital = 4294967295;
   double s = -1;
   unsigned int mysize = m_n.size();
   
@@ -110,7 +110,6 @@ unsigned int ShellModelState::GetMainOrbital(){
   }
 
   return orbital;
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////

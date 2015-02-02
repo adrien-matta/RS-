@@ -22,9 +22,11 @@ namespace RS{
 
     public:
       void LoadCollectionFromOxbash(unsigned int NumberOfState,std::string LPE, std::string LPF);
+      void LoadCollectionFromSimpleFile(std::string FileName);
       void SetReferenceEnergy(double Energy);
       void SetGroundState(double J, int P , int order);
       void AddState(RS::ShellModelState state);
+      unsigned int GetStatus(unsigned int i);
       unsigned int GetNumberOfState();
       RS::ShellModelState GetState(unsigned int i);
       void SetName(std::string name);
@@ -33,6 +35,7 @@ namespace RS{
       void SelectStateByStrength(double threshold);
       void SelectStateByMainSF(double threshold);
       void SelectStateByMainCS(double threshold);
+      void SelectStateByParity(int Parity);
       void Print(int status = -1);
   };
 }

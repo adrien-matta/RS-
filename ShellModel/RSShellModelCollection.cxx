@@ -25,12 +25,39 @@ void ShellModelCollection::AddState(RS::ShellModelState state){
   m_collection.push_back(state);
   m_status.push_back(1);
 }
+////////////////////////////////////////////////////////////////////////////////
+unsigned int ShellModelCollection::GetStatus(unsigned int i){
+  return m_status[i];
+}
+////////////////////////////////////////////////////////////////////////////////
+void ShellModelCollection::LoadCollectionFromSimpleFile(std::string FileName){
+ std::ifstream File(FileName.c_str());
+ std::string LineBuffer;
+ while(getline(File,LineBuffer)){
+   std::istringstream line(LineBuffer);
+   double E,J;
+   line >> E >> J;
+   int P;
+   if(J>0) P =1 ;
+   else{
+     J=-J;
+     P=-1;
+   }
+   
+  ShellModelState state(E,J,P,0);
+  int n,l;
+  double j,s; 
+  while(line >> n >> l >> j >> s){
+    state.AddOrbital(n,l,j,s);
+  }
 
+  AddState(state);
+ }
+}
 ////////////////////////////////////////////////////////////////////////////////
 void ShellModelCollection::LoadCollectionFromOxbash(unsigned int NumberOfStates,std::string LPE, std::string LSF){
   /// Look how much state are already loaded:
   unsigned int offset = m_collection.size();
-
 
   //////////////
   // LPE PART //
@@ -76,16 +103,22 @@ void ShellModelCollection::LoadCollectionFromOxbash(unsigned int NumberOfStates,
       getline(levelfile,LineBuffer);// empty
       getline(levelfile,LineBuffer);// empty
       int count = 0 ;
-      while( getline(levelfile,LineBuffer) && count<NumberOfStates ){
+      // First Line of interest
+      getline(levelfile,LineBuffer); 
+      while( count<NumberOfStates ){
+        // Skip empty line
+        while(LineBuffer.compare(0,4,"    ")==0){
+           getline(levelfile,LineBuffer);
+        }
+                 
         double E;
         std::istringstream os(LineBuffer);
         os >> buffer >> E ;
         ShellModelState state(E+gs,thespin,theparity,count+1);
         AddState(state);
-        // Skip the next line
-        if(LineBuffer.compare(0,18,"                   ")==0)
-          getline(levelfile,LineBuffer);
         count++;
+        // take the next line
+        getline(levelfile,LineBuffer); 
       }
     }
   }
@@ -177,6 +210,11 @@ void ShellModelCollection::LoadCollectionFromOxbash(unsigned int NumberOfStates,
 unsigned int ShellModelCollection::GetNumberOfState(){
   return m_collection.size();
 }
+////////////////////////////////////////////////////////////////////////////////
+ShellModelState ShellModelCollection::GetState(unsigned int i){
+  return m_collection[i];
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 void ShellModelCollection::SetName(std::string name){
@@ -192,7 +230,7 @@ void ShellModelCollection::SelectStateByTotalSF(double threshold){
     }
 
     if(totalSF > threshold){
-      m_status[i]=1;
+      //m_status[i]=1;
     }
 
     else
@@ -203,7 +241,7 @@ void ShellModelCollection::SelectStateByTotalSF(double threshold){
 void ShellModelCollection::SelectStateByTotalCS(double threshold){
   double initial_spin = 2.5;
   double BeamEnergy =  10;
-  double QValue = 3.35; 
+  double QValue = 3.35;
   unsigned int mysize = m_collection.size();
   for(unsigned int i = 0 ; i < mysize ; i++){
     double totalCS = 0;
@@ -222,7 +260,14 @@ void ShellModelCollection::SelectStateByTotalCS(double threshold){
       Front_Input << m_collection[i].GetOrbitalL(orb) << " " << m_collection[i].GetOrbitalJ(orb) << std::endl;
       Front_Input << m_collection[i].GetOrbitalN(orb)-1 << std::endl;
       Front_Input << 2 << std::endl;
-      Front_Input << QValue - m_collection[i].GetEnergy() << std::endl;
+      // Bound case:
+      if( QValue - m_collection[i].GetEnergy() > 0 )
+        Front_Input << QValue - m_collection[i].GetEnergy() << std::endl;
+
+      // Unbound case
+      else           
+        Front_Input << 0.01 << std::endl;
+
       Front_Input << 1 << std::endl;
       Front_Input << initial_spin << std::endl;
       Front_Input << 1 << std::endl;
@@ -248,19 +293,21 @@ void ShellModelCollection::SelectStateByTotalCS(double threshold){
       std::ifstream csfile("21.jjj");
       std::vector<double> x,y;
       double xx , yy, dump;
-      
+
       while(csfile>> yy >> xx >> dump){
         CS+=sin(yy*M_PI/180.)*(2*M_PI)*(M_PI/180.)*xx;
       }
 
       totalCS +=CS*m_collection[i].GetOrbitalS(orb);
     }
-    
-    if(totalCS>threshold)
-      m_status[i] = 1;
+
+    if(totalCS>threshold){
+      // m_status[i] = 1;
+    }
+         
     else
       m_status[i] = 0;
-  
+
   }
 
 }
@@ -278,13 +325,12 @@ void ShellModelCollection::SelectStateByStrength(double threshold){
     }
 
     if(Strength > threshold){
-      m_status[i]=1;
+     // m_status[i]=1;
     }
 
     else
       m_status[i]=0;
   }
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -293,10 +339,10 @@ void ShellModelCollection::SelectStateByMainSF(double threshold){
   for(unsigned int i = 0 ; i < mysize ; i++){
     unsigned int Orbital =  m_collection[i].GetMainOrbital();
 
-    if(Orbital == 1000)  m_status[i]=0;
+    if(Orbital >mysize)  m_status[i]=0;
 
     else if(m_collection[i].GetSumOfSForL( m_collection[i].GetOrbitalL(Orbital))> threshold){
-      m_status[i]=1;
+      //m_status[i]=1;
     }
     else
       m_status[i]=0;
@@ -304,6 +350,21 @@ void ShellModelCollection::SelectStateByMainSF(double threshold){
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ShellModelCollection::SelectStateByMainCS(double threshold){
+}
+////////////////////////////////////////////////////////////////////////////////
+void ShellModelCollection::SelectStateByParity(int Parity){
+  if(Parity > 0) Parity = 1;
+  else if(Parity < 0) Parity = -1;
+  else return;
+
+  unsigned int mysize = m_collection.size();
+  for(unsigned int i = 0 ; i < mysize ; i++){
+     if(m_collection[i].GetParity()==Parity){
+      //m_status[i]=1;
+    }
+    else
+      m_status[i]=0;
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ShellModelCollection::Print(int status){
@@ -349,7 +410,6 @@ void ShellModelCollection::SetReferenceEnergy(double Energy){
   for(unsigned int i = 0 ; i < mysize ; i++){
     m_collection[i].SetEnergy(m_collection[i].GetEnergy()+Energy);
   }
-
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ShellModelCollection::SetGroundState(double J, int P , int order){
@@ -361,7 +421,5 @@ void ShellModelCollection::SetGroundState(double J, int P , int order){
       SetReferenceEnergy( m_collection[i].GetEnergy());
     }
   }
-
-
 }
 ////////////////////////////////////////////////////////////////////////////////
