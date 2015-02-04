@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <set>
 // RS++
 #include "RSShellModelCollection.h"
 using namespace RS;
@@ -31,28 +32,66 @@ unsigned int ShellModelCollection::GetStatus(unsigned int i){
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ShellModelCollection::LoadCollectionFromSimpleFile(std::string FileName){
- std::ifstream File(FileName.c_str());
- std::string LineBuffer;
- while(getline(File,LineBuffer)){
-   std::istringstream line(LineBuffer);
-   double E,J;
-   line >> E >> J;
-   int P;
-   if(J>0) P =1 ;
-   else{
-     J=-J;
-     P=-1;
-   }
-   
-  ShellModelState state(E,J,P,0);
-  int n,l;
-  double j,s; 
-  while(line >> n >> l >> j >> s){
-    state.AddOrbital(n,l,j,s);
-  }
+  std::ifstream File(FileName.c_str());
+  std::string LineBuffer;
+  while(getline(File,LineBuffer)){
+    std::istringstream line(LineBuffer);
+    double E,J;
+    line >> E >> J;
+    int P;
+    if(J>0) P =1 ;
+    else{
+      J=-J;
+      P=-1;
+    }
 
-  AddState(state);
- }
+    ShellModelState state(E,J,P,0);
+    int n,l;
+    double j,s; 
+    while(line >> n >> l >> j >> s){
+      state.AddOrbital(n,l,j,s);
+    }
+
+    AddState(state);
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
+std::vector< std::vector <unsigned int> > ShellModelCollection::MatchCollection(ShellModelCollection& Collection,double limit , unsigned int status){
+  unsigned int size1 = m_collection.size();
+  unsigned int size2 = Collection.GetNumberOfState();
+
+  std::vector< std::vector <unsigned int> > resultat;
+  std::vector <unsigned int> line;
+  resultat.resize(size1,line);
+  std::set <unsigned int> already; 
+  for(unsigned int i = 0 ; i < size1 ; i++){
+    if(m_status[i]==status){
+      ShellModelState state1 = m_collection[i];
+      double diff = 100000;
+      unsigned int match=100000;
+      for(unsigned j = 0 ; j < size2 ; j++){
+        if(Collection.GetStatus(j)==status){
+          ShellModelState state2 = Collection.GetState(j);
+          if(state1.GetJ()==state2.GetJ() 
+              && state1.GetParity()==state2.GetParity()){
+            double Ed = fabs(state1.GetEnergy()-state2.GetEnergy());
+            if(Ed<diff && Ed<limit && already.find(j)==already.end() ){
+              diff = Ed;
+              match = j;
+              std::cout << Ed << " " << limit << std::endl;
+            }
+          }
+        }
+      }
+      if(match != 100000){
+        std::vector<unsigned int> l;
+        l.push_back(match);
+        already.insert(match);
+        resultat[i]=l;
+      }
+    }
+  }
+  return resultat;
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ShellModelCollection::LoadCollectionFromOxbash(unsigned int NumberOfStates,std::string LPE, std::string LSF){
@@ -108,9 +147,9 @@ void ShellModelCollection::LoadCollectionFromOxbash(unsigned int NumberOfStates,
       while( count<NumberOfStates ){
         // Skip empty line
         while(LineBuffer.compare(0,4,"    ")==0){
-           getline(levelfile,LineBuffer);
+          getline(levelfile,LineBuffer);
         }
-                 
+
         double E;
         std::istringstream os(LineBuffer);
         os >> buffer >> E ;
@@ -304,7 +343,7 @@ void ShellModelCollection::SelectStateByTotalCS(double threshold){
     if(totalCS>threshold){
       // m_status[i] = 1;
     }
-         
+
     else
       m_status[i] = 0;
 
@@ -325,7 +364,7 @@ void ShellModelCollection::SelectStateByStrength(double threshold){
     }
 
     if(Strength > threshold){
-     // m_status[i]=1;
+      // m_status[i]=1;
     }
 
     else
@@ -359,7 +398,7 @@ void ShellModelCollection::SelectStateByParity(int Parity){
 
   unsigned int mysize = m_collection.size();
   for(unsigned int i = 0 ; i < mysize ; i++){
-     if(m_collection[i].GetParity()==Parity){
+    if(m_collection[i].GetParity()==Parity){
       //m_status[i]=1;
     }
     else

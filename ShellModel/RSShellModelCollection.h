@@ -21,6 +21,7 @@ namespace RS{
       std::string m_name;
 
     public:
+      std::vector< std::vector <unsigned int> > MatchCollection(ShellModelCollection& Collection,double limit, unsigned int status);
       void LoadCollectionFromOxbash(unsigned int NumberOfState,std::string LPE, std::string LPF);
       void LoadCollectionFromSimpleFile(std::string FileName);
       void SetReferenceEnergy(double Energy);
