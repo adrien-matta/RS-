@@ -6,6 +6,7 @@
 #include <set>
 // RS++
 #include "RSShellModelCollection.h"
+#include "../Reaction/RSDifferentialCrossSection.h"
 using namespace RS;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -328,6 +329,9 @@ void ShellModelCollection::SelectStateByTotalCS(double threshold){
       system("FRONT < in.front");
       system("echo tran.jjj | TWOFNR > dump.txt");
 
+      DifferentialCrossSection dCS;
+      dCS.LoadFromASCII("21.jjj");
+
       double CS = 0 ;
       std::ifstream csfile("21.jjj");
       std::vector<double> x,y;
@@ -338,6 +342,8 @@ void ShellModelCollection::SelectStateByTotalCS(double threshold){
       }
 
       totalCS +=CS*m_collection[i].GetOrbitalS(orb);
+
+      std::cout << dCS.Integrate() << " " << totalCS << std::endl;
     }
 
     if(totalCS>threshold){

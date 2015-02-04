@@ -22,7 +22,7 @@ set(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR})
 link_directories( ${LINK_DIRECTORIES})
 
 # add lib
-set(RS_SUB_DIRECTORIES ShellModel Reaction)
+set(RS_SUB_DIRECTORIES Core)
 
 # Macro that add the sub dir and the include file install path
 foreach(subdir ${RS_SUB_DIRECTORIES})

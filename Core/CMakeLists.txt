@@ -1,0 +1,2 @@
+add_library(RSCore SHARED RSDifferentialCrossSection.h RSDifferentialCrossSection.cxx RSShellModelState.h RSShellModelState.cxx RSShellModelCollection.h RSShellModelCollection.cxx)
+target_link_libraries(RSCore ${ROOT_LIBRARIES})
