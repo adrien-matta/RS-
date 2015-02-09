@@ -3,6 +3,9 @@
 #include<string>
 #include<vector>
 
+// RS
+#include"RSDifferentialCrossSection.h"
+
 namespace RS{
 
   class ShellModelState{
@@ -35,6 +38,10 @@ namespace RS{
       double GetOrbitalJ(unsigned int i);
       double GetOrbitalS(unsigned int i);
 
+      DifferentialCrossSection GetTotalCS();
+      DifferentialCrossSection GetOrbitalCS(unsigned int i);
+      std::vector<DifferentialCrossSection> GetAllOrbitalCS();
+      
       unsigned int GetMainOrbital();
       double GetSumOfSForL(unsigned int l);
 

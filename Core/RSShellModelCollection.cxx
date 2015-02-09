@@ -6,7 +6,7 @@
 #include <set>
 // RS++
 #include "RSShellModelCollection.h"
-#include "../Reaction/RSDifferentialCrossSection.h"
+#include "RSDifferentialCrossSection.h"
 using namespace RS;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,6 @@ std::vector< std::vector <unsigned int> > ShellModelCollection::MatchCollection(
             if(Ed<diff && Ed<limit && already.find(j)==already.end() ){
               diff = Ed;
               match = j;
-              std::cout << Ed << " " << limit << std::endl;
             }
           }
         }
@@ -279,82 +278,14 @@ void ShellModelCollection::SelectStateByTotalSF(double threshold){
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ShellModelCollection::SelectStateByTotalCS(double threshold){
-  double initial_spin = 2.5;
-  double BeamEnergy =  10;
-  double QValue = 3.35;
   unsigned int mysize = m_collection.size();
   for(unsigned int i = 0 ; i < mysize ; i++){
-    double totalCS = 0;
-    double final_spin = m_collection[i].GetJ();
-    unsigned int nbrorb = m_collection[i].GetNumberOfOrbital();
-    for(unsigned int orb = 0 ; orb < nbrorb ; orb++ ){
-      std::ofstream Front_Input("in.front");
-      Front_Input << "jjj" << std::endl;
-      Front_Input << "pipo" << std::endl;
-      Front_Input << 2 << std::endl;
-      Front_Input << BeamEnergy << std::endl;
-      Front_Input << 26 << " " << 11 << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << "0 0 0" << std::endl;
-      Front_Input << m_collection[i].GetOrbitalL(orb) << " " << m_collection[i].GetOrbitalJ(orb) << std::endl;
-      Front_Input << m_collection[i].GetOrbitalN(orb)-1 << std::endl;
-      Front_Input << 2 << std::endl;
-      // Bound case:
-      if( QValue - m_collection[i].GetEnergy() > 0 )
-        Front_Input << QValue - m_collection[i].GetEnergy() << std::endl;
-
-      // Unbound case
-      else           
-        Front_Input << 0.01 << std::endl;
-
-      Front_Input << 1 << std::endl;
-      Front_Input << initial_spin << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << 5 << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << final_spin << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << 2 << std::endl;
-      Front_Input << 2 << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << 1.25 << " " << 0.65 << std::endl;
-      Front_Input << 6.0 << std::endl;
-      Front_Input << 0 << std::endl;
-      Front_Input << 0 << std::endl;
-
-      Front_Input.close() ;
-
-      system("FRONT < in.front");
-      system("echo tran.jjj | TWOFNR > dump.txt");
-
-      DifferentialCrossSection dCS;
-      dCS.LoadFromASCII("21.jjj");
-
-      double CS = 0 ;
-      std::ifstream csfile("21.jjj");
-      std::vector<double> x,y;
-      double xx , yy, dump;
-
-      while(csfile>> yy >> xx >> dump){
-        CS+=sin(yy*M_PI/180.)*(2*M_PI)*(M_PI/180.)*xx;
-      }
-
-      totalCS +=CS*m_collection[i].GetOrbitalS(orb);
-
-      std::cout << dCS.Integrate() << " " << totalCS << std::endl;
-    }
-
-    if(totalCS>threshold){
+    if(m_collection[i].GetTotalCS().Integrate()  > threshold){
       // m_status[i] = 1;
     }
-
     else
       m_status[i] = 0;
-
   }
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////

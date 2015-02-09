@@ -17,24 +17,26 @@ namespace RS{
     private:
       std::vector<double> m_x;
       std::vector<double> m_y;
-    
+
     public:
       void LoadFromASCII(std::string filename);
-      double Integrate(double low=0, double up=180);
+      void LoadFromTWOFNR(std::string filename);
+      double Integrate(double low=-1, double up=200);
       void Scale(const double& scale);
-      DifferentialCrossSection& operator+=(DifferentialCrossSection& left);
-      DifferentialCrossSection& operator-=(DifferentialCrossSection& left);
+      DifferentialCrossSection& operator+=(DifferentialCrossSection&);
+      DifferentialCrossSection& operator-=(DifferentialCrossSection& );
 
     public: // ROOT
-      double Eval(const double& x) ;
+      double Eval(const double& x);
       TGraph* GetTGraph();
-      bool m_modified;  
+      bool m_modified; 
+
     private: // ROOT
-    TGraph* m_g ;
+      TGraph* m_g ;
 
   };
-  inline DifferentialCrossSection operator+(DifferentialCrossSection& left, DifferentialCrossSection& right);
-  inline DifferentialCrossSection operator-(DifferentialCrossSection& left, DifferentialCrossSection& right);
+  DifferentialCrossSection operator+(DifferentialCrossSection& , DifferentialCrossSection& );
+  DifferentialCrossSection operator-(DifferentialCrossSection& , DifferentialCrossSection& );
 
 
 }

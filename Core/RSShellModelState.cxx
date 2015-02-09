@@ -2,6 +2,7 @@
 
 #include<iostream>
 #include<sstream>
+#include<fstream>
 #include<cmath>
 using namespace RS;
 ////////////////////////////////////////////////////////////////////////////////
@@ -136,4 +137,79 @@ void ShellModelState::Print(){
    std::cout << GetOrbitalString(i) << " S= " << m_s[i] << std::endl;
  } 
 }
+
 ////////////////////////////////////////////////////////////////////////////////
+DifferentialCrossSection ShellModelState::GetTotalCS(){
+ DifferentialCrossSection CS;
+ unsigned int mysize = m_n.size();
+ for(unsigned int i = 0 ; i < mysize ; i++){
+   DifferentialCrossSection temp = GetOrbitalCS(i);
+   CS +=temp;  
+ } 
+
+ return CS;
+}
+////////////////////////////////////////////////////////////////////////////////
+std::vector<DifferentialCrossSection> ShellModelState::GetAllOrbitalCS(){
+  std::vector<DifferentialCrossSection> CS;
+ unsigned int mysize = m_n.size();
+ for(unsigned int i = 0 ; i < mysize ; i++){
+   DifferentialCrossSection temp = GetOrbitalCS(i);
+   CS.push_back(temp); 
+ } 
+
+ return CS;
+}
+////////////////////////////////////////////////////////////////////////////////
+DifferentialCrossSection ShellModelState::GetOrbitalCS(unsigned int i){
+  double initial_spin = 2.5;
+  double BeamEnergy =  5;
+  double QValue = 3.35;
+  double final_spin = m_J;
+  
+      std::ofstream Front_Input("in.front");
+      Front_Input << "jjj" << std::endl;
+      Front_Input << "pipo" << std::endl;
+      Front_Input << 2 << std::endl;
+      Front_Input << BeamEnergy << std::endl;
+      Front_Input << 25 << " " << 11 << std::endl;
+      Front_Input << 1 << std::endl;
+      Front_Input << 1 << std::endl;
+      Front_Input << "0 0 0" << std::endl;
+      Front_Input << m_l[i] << " " << m_j[i] << std::endl;
+      Front_Input << m_n[i]-1 << std::endl;
+      Front_Input << 2 << std::endl;
+      
+      // unbound case:
+      if( QValue - m_E < 0 )
+        Front_Input << 0.01 << std::endl;
+      else
+        Front_Input << QValue-m_E << std::endl; 
+
+      Front_Input << 1 << std::endl;
+      Front_Input << initial_spin << std::endl;
+      Front_Input << 1 << std::endl;
+      Front_Input << 5 << std::endl;
+      Front_Input << 1 << std::endl;
+      Front_Input << final_spin << std::endl;
+      Front_Input << 1 << std::endl;
+      Front_Input << 2 << std::endl;
+      Front_Input << 2 << std::endl;
+      Front_Input << 1 << std::endl;
+      Front_Input << 1 << std::endl;
+      Front_Input << 1.25 << " " << 0.65 << std::endl;
+      Front_Input << 6.0 << std::endl;
+      Front_Input << 0 << std::endl;
+      Front_Input << 0 << std::endl;
+
+      Front_Input.close() ;
+
+      system("FRONT < in.front > dump1.txt");
+      system("echo tran.jjj | TWOFNR > dump2.txt");
+
+      DifferentialCrossSection CS;
+      CS.LoadFromTWOFNR("24.jjj");
+      CS.Scale(m_s[i]);
+      return CS;
+}
+
