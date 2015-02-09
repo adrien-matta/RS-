@@ -46,16 +46,37 @@ int ShellModelState::GetOrder(){
 
 ////////////////////////////////////////////////////////////////////////////////
 void ShellModelState::AddOrbital(unsigned int n, unsigned int l, double j, double s){
-  m_n.push_back(n);
-  m_l.push_back(l);
-  m_j.push_back(j);
-  m_s.push_back(s);
+  // Guarantee that the orbital list is by SF ordering importance (biggest SF first)
+
+  if(!m_n.empty()){
+    std::vector<unsigned int>::iterator it_n = m_n.begin();;
+    std::vector<unsigned int>::iterator it_l = m_l.begin();;
+    std::vector<double>::iterator it_j = m_j.begin();
+    std::vector<double>::iterator it_s = m_s.begin();
+
+    for(it_n = m_n.begin(); it_n!=m_n.end(); it_n++,it_l++,it_j++,it_s++){
+      if(*it_s < s){
+        m_n.insert(it_n,n);
+        m_l.insert(it_l,l);
+        m_j.insert(it_j,j);
+        m_s.insert(it_s,s);
+        break;
+      }
+    }
+  }
+
+  else{
+    m_n.push_back(n);
+    m_l.push_back(l);
+    m_j.push_back(j);
+    m_s.push_back(s);
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 unsigned int ShellModelState::GetNumberOfOrbital(){
   return m_n.size();
- }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 std::string ShellModelState::GetOrbitalString(unsigned int i){
@@ -102,11 +123,11 @@ unsigned int ShellModelState::GetMainOrbital(){
   unsigned int orbital = 4294967295;
   double s = -1;
   unsigned int mysize = m_n.size();
-  
+
   for(unsigned int i = 0 ; i < mysize ; i++){
     if(m_s[i]>s){
-       orbital = i;
-       s = m_s[i];
+      orbital = i;
+      s = m_s[i];
     }
   }
 
@@ -117,10 +138,10 @@ unsigned int ShellModelState::GetMainOrbital(){
 double ShellModelState::GetSumOfSForL(unsigned int l){
   double sum = 0;
   unsigned int mysize = m_n.size();
-  
+
   for(unsigned int i = 0 ; i < mysize ; i++){
     if(m_l[i]==l)
-       sum+= m_s[i];
+      sum+= m_s[i];
   }
 
   return sum;
@@ -132,33 +153,33 @@ void ShellModelState::Print(){
   if(m_P<0) std::cout << "-" << std::endl;
   else      std::cout << "+" << std::endl;
 
- unsigned int mysize = m_n.size();
- for(unsigned int i = 0 ; i < mysize ; i++){
-   std::cout << GetOrbitalString(i) << " S= " << m_s[i] << std::endl;
- } 
+  unsigned int mysize = m_n.size();
+  for(unsigned int i = 0 ; i < mysize ; i++){
+    std::cout << GetOrbitalString(i) << " S= " << m_s[i] << std::endl;
+  } 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 DifferentialCrossSection ShellModelState::GetTotalCS(){
- DifferentialCrossSection CS;
- unsigned int mysize = m_n.size();
- for(unsigned int i = 0 ; i < mysize ; i++){
-   DifferentialCrossSection temp = GetOrbitalCS(i);
-   CS +=temp;  
- } 
+  DifferentialCrossSection CS;
+  unsigned int mysize = m_n.size();
+  for(unsigned int i = 0 ; i < mysize ; i++){
+    DifferentialCrossSection temp = GetOrbitalCS(i);
+    CS +=temp;  
+  } 
 
- return CS;
+  return CS;
 }
 ////////////////////////////////////////////////////////////////////////////////
 std::vector<DifferentialCrossSection> ShellModelState::GetAllOrbitalCS(){
   std::vector<DifferentialCrossSection> CS;
- unsigned int mysize = m_n.size();
- for(unsigned int i = 0 ; i < mysize ; i++){
-   DifferentialCrossSection temp = GetOrbitalCS(i);
-   CS.push_back(temp); 
- } 
+  unsigned int mysize = m_n.size();
+  for(unsigned int i = 0 ; i < mysize ; i++){
+    DifferentialCrossSection temp = GetOrbitalCS(i);
+    CS.push_back(temp); 
+  } 
 
- return CS;
+  return CS;
 }
 ////////////////////////////////////////////////////////////////////////////////
 DifferentialCrossSection ShellModelState::GetOrbitalCS(unsigned int i){
@@ -166,50 +187,50 @@ DifferentialCrossSection ShellModelState::GetOrbitalCS(unsigned int i){
   double BeamEnergy =  5;
   double QValue = 3.35;
   double final_spin = m_J;
-  
-      std::ofstream Front_Input("in.front");
-      Front_Input << "jjj" << std::endl;
-      Front_Input << "pipo" << std::endl;
-      Front_Input << 2 << std::endl;
-      Front_Input << BeamEnergy << std::endl;
-      Front_Input << 25 << " " << 11 << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << "0 0 0" << std::endl;
-      Front_Input << m_l[i] << " " << m_j[i] << std::endl;
-      Front_Input << m_n[i]-1 << std::endl;
-      Front_Input << 2 << std::endl;
-      
-      // unbound case:
-      if( QValue - m_E < 0 )
-        Front_Input << 0.01 << std::endl;
-      else
-        Front_Input << QValue-m_E << std::endl; 
 
-      Front_Input << 1 << std::endl;
-      Front_Input << initial_spin << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << 5 << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << final_spin << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << 2 << std::endl;
-      Front_Input << 2 << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << 1 << std::endl;
-      Front_Input << 1.25 << " " << 0.65 << std::endl;
-      Front_Input << 6.0 << std::endl;
-      Front_Input << 0 << std::endl;
-      Front_Input << 0 << std::endl;
+  std::ofstream Front_Input("in.front");
+  Front_Input << "jjj" << std::endl;
+  Front_Input << "pipo" << std::endl;
+  Front_Input << 2 << std::endl;
+  Front_Input << BeamEnergy << std::endl;
+  Front_Input << 25 << " " << 11 << std::endl;
+  Front_Input << 1 << std::endl;
+  Front_Input << 1 << std::endl;
+  Front_Input << "0 0 0" << std::endl;
+  Front_Input << m_l[i] << " " << m_j[i] << std::endl;
+  Front_Input << m_n[i]-1 << std::endl;
+  Front_Input << 2 << std::endl;
 
-      Front_Input.close() ;
+  // unbound case:
+  if( QValue - m_E < 0 )
+    Front_Input << 0.01 << std::endl;
+  else
+    Front_Input << QValue-m_E << std::endl; 
 
-      system("FRONT < in.front > dump1.txt");
-      system("echo tran.jjj | TWOFNR > dump2.txt");
+  Front_Input << 1 << std::endl;
+  Front_Input << initial_spin << std::endl;
+  Front_Input << 1 << std::endl;
+  Front_Input << 5 << std::endl;
+  Front_Input << 1 << std::endl;
+  Front_Input << final_spin << std::endl;
+  Front_Input << 1 << std::endl;
+  Front_Input << 2 << std::endl;
+  Front_Input << 2 << std::endl;
+  Front_Input << 1 << std::endl;
+  Front_Input << 1 << std::endl;
+  Front_Input << 1.25 << " " << 0.65 << std::endl;
+  Front_Input << 6.0 << std::endl;
+  Front_Input << 0 << std::endl;
+  Front_Input << 0 << std::endl;
 
-      DifferentialCrossSection CS;
-      CS.LoadFromTWOFNR("24.jjj");
-      CS.Scale(m_s[i]);
-      return CS;
+  Front_Input.close() ;
+
+  system("FRONT < in.front > dump1.txt");
+  system("echo tran.jjj | TWOFNR > dump2.txt");
+
+  DifferentialCrossSection CS;
+  CS.LoadFromTWOFNR("24.jjj");
+  CS.Scale(m_s[i]);
+  return CS;
 }
 
