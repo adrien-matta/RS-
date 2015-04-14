@@ -106,7 +106,7 @@ void RS::OverlapFunction::Normalise(double norm){
 ////////////////////////////////////////////////////////////////////////////////
 void RS::OverlapFunction::Scale(double factor){
   size_t mysize = m_OverlapFunction_OL.size();
-  
+
   double efactor = factor;
   if(efactor<0)
     efactor=sqrt(factor*factor);
@@ -134,7 +134,7 @@ void RS::OverlapFunction::Multiply(TF1* f){
     m_OverlapFunction_OL[i]*=f->Eval(m_OverlapFunction_R[i]);
   }
   m_modified=true;
-  
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -232,7 +232,7 @@ RS::OverlapFunction& RS::OverlapFunction::operator-=(OverlapFunction& right){
 
 
 ////////////////////////////////////////////////////////////////////////////////
-RS::OverlapFunction RS::OverlapFunction::FitWithOverlap(std::vector<RS::OverlapFunction> Th, std::vector<double>& param,std::vector<double>& err, double lmin,double lmax){
+RS::OverlapFunction RS::OverlapFunction::FitWithOverlap(std::vector<RS::OverlapFunction> Th, std::vector<double>& param,std::vector<double>& err, double lmin,double lmax,std::vector<RS::OverlapFunction> Constant){
   // Make a local copy of the function
   if(lmin<lmax){
     m_min= lmin;
@@ -247,6 +247,8 @@ RS::OverlapFunction RS::OverlapFunction::FitWithOverlap(std::vector<RS::OverlapF
   m_ThOriginal.clear();
   m_ThOriginal = Th;
 
+  m_ThConstant.clear();
+  m_ThConstant=Constant;
   unsigned int mysize = Th.size();
   param.resize(mysize,0);
   err.resize(mysize,0);
@@ -254,7 +256,7 @@ RS::OverlapFunction RS::OverlapFunction::FitWithOverlap(std::vector<RS::OverlapF
   const char* minName ="Minuit2";const char* algoName="Fumili2";
 
   ROOT::Math::Minimizer* min =
-  ROOT::Math::Factory::CreateMinimizer(minName, algoName);
+    ROOT::Math::Factory::CreateMinimizer(minName, algoName);
   min->SetValidError(true);
   min->SetMaxFunctionCalls(1e6) ;
   // create funciton wrapper for minimizer
@@ -266,7 +268,8 @@ RS::OverlapFunction RS::OverlapFunction::FitWithOverlap(std::vector<RS::OverlapF
     parameter[i] = param[i];
     char name[4];
     sprintf(name,"V%d",i+1);
-    min->SetLimitedVariable(i,name,parameter[i],0.1,-1000,1000);
+    min->SetVariable(i,name,parameter[i],0.1);
+
   }
   // do the minimization
   min->Minimize();
@@ -280,11 +283,17 @@ RS::OverlapFunction RS::OverlapFunction::FitWithOverlap(std::vector<RS::OverlapF
     Th[i].Scale(xs[i]);
     OL+=Th[i];
   }
+  
+  mysize = m_ThConstant.size();
+  for(unsigned int i = 0 ; i < mysize ; i++){
+    OL+=m_ThConstant[i];
+  }
+
 
   // Clean up
   m_ThOriginal.clear();
   m_ThCurrent.clear(); 
-
+  m_ThConstant.clear();
   return OL;
 
 }
@@ -316,5 +325,13 @@ double RS::OverlapFunction::ComputeChi2Fit(const double* parameter){
     m_ThCurrent[i].Scale(parameter[i]);
     OF+= m_ThCurrent[i];
   }
+
+  // Add the constant part
+  mysize = m_ThConstant.size();
+  for(unsigned int i = 0 ; i < mysize ; i++){
+    OF+= m_ThConstant[i];
+  }
+
+
   return ComputeChi2(OF); 
 }
