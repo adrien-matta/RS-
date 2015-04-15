@@ -232,7 +232,7 @@ RS::OverlapFunction& RS::OverlapFunction::operator-=(OverlapFunction& right){
 
 
 ////////////////////////////////////////////////////////////////////////////////
-RS::OverlapFunction RS::OverlapFunction::FitWithOverlap(std::vector<RS::OverlapFunction> Th, std::vector<double>& param,std::vector<double>& err, double lmin,double lmax,std::vector<RS::OverlapFunction> Constant){
+RS::OverlapFunction RS::OverlapFunction::FitWithOverlap(std::vector<RS::OverlapFunction>& Th, std::vector<double>& param,std::vector<double>& err, double lmin,double lmax,std::vector<RS::OverlapFunction> Constant){
   // Make a local copy of the function
   if(lmin<lmax){
     m_min= lmin;
@@ -291,6 +291,7 @@ RS::OverlapFunction RS::OverlapFunction::FitWithOverlap(std::vector<RS::OverlapF
 
 
   // Clean up
+  Th=m_ThCurrent;
   m_ThOriginal.clear();
   m_ThCurrent.clear(); 
   m_ThConstant.clear();

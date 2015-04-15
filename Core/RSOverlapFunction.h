@@ -41,7 +41,7 @@ namespace RS{
 
   
     public: // Fit
-      RS::OverlapFunction FitWithOverlap(std::vector<RS::OverlapFunction>,std::vector<double>& param,std::vector<double>& err,double lmin=-1,double lmax=-1,std::vector<RS::OverlapFunction> Constant=std::vector<RS::OverlapFunction>());
+      RS::OverlapFunction FitWithOverlap(std::vector<RS::OverlapFunction>&,std::vector<double>& param,std::vector<double>& err,double lmin=-1,double lmax=-1,std::vector<RS::OverlapFunction> Constant=std::vector<RS::OverlapFunction>());
       double ComputeChi2(OverlapFunction&);
       double ComputeChi2Fit(const double* param);
 

@@ -32,7 +32,7 @@ namespace RS{
       RS::ShellModelState GetState(unsigned int i);
       void SetName(std::string name);
       void SelectStateByTotalSF(double threshold);
-      void SelectStateByTotalCS(double threshold);
+      void SelectStateByTotalCS(double threshold,double low=-1,double up=-1);
       void SelectStateByStrength(double threshold);
       void SelectStateByMainSF(double threshold);
       void SelectStateByMainCS(double threshold);

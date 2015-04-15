@@ -122,7 +122,7 @@ void ExperimentalCrossSection::Divide(TF1*){
 void ExperimentalCrossSection::Divide(TGraph*){
 }
 ////////////////////////////////////////////////////////////////////////////////
-DifferentialCrossSection ExperimentalCrossSection::FindNormalisation(std::vector<DifferentialCrossSection>& Th,std::vector<double>& Norm,std::vector<double>& errNorm){
+DifferentialCrossSection ExperimentalCrossSection::FindNormalisation(std::vector<DifferentialCrossSection> Th,std::vector<double>& Norm,std::vector<double>& errNorm){
   // Make a local copy of the function
   m_ThOriginal.clear();
   m_ThOriginal = Th;
@@ -151,12 +151,12 @@ DifferentialCrossSection ExperimentalCrossSection::FindNormalisation(std::vector
   // do the minimization
   min->Minimize();
   const double *xs = min->X();
-  
+  const double *err = min->Errors(); 
  // Return the Fitted CS
   DifferentialCrossSection cs;
   for(unsigned int i = 0 ; i < mysize ; i++){
     Norm[i] = xs[i];
-    errNorm[i] = min->Errors()[i]; 
+    errNorm[i] = err[i]; 
     Th[i].Scale(xs[i]);
     cs+=Th[i];
   }

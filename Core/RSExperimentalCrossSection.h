@@ -41,7 +41,7 @@ namespace RS{
 
    public: // Fit
       // Return the normalised CS as a new object
-       DifferentialCrossSection FindNormalisation(std::vector<DifferentialCrossSection>&,std::vector<double>& Norm,std::vector<double>& errNorm);
+       DifferentialCrossSection FindNormalisation(std::vector<DifferentialCrossSection>,std::vector<double>& Norm,std::vector<double>& errNorm);
        double ComputeChi2(DifferentialCrossSection&);
        double ComputeChi2Fit(const double* parameter);
 

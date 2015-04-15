@@ -64,21 +64,28 @@ std::vector< std::vector <unsigned int> > ShellModelCollection::MatchCollection(
   std::vector< std::vector <unsigned int> > resultat;
   std::vector <unsigned int> line;
   resultat.resize(size1,line);
-  std::set <unsigned int> already; 
+  std::set <unsigned int> already;
+  // Firt pass, everything should pass
   for(unsigned int i = 0 ; i < size1 ; i++){
     if(m_status[i]==status){
       ShellModelState state1 = m_collection[i];
-      double diff = 100000;
+      double diffE = 100000;
+      double diffS = 100000;
       unsigned int match=100000;
       for(unsigned j = 0 ; j < size2 ; j++){
         if(Collection.GetStatus(j)==status){
           ShellModelState state2 = Collection.GetState(j);
           if(state1.GetJ()==state2.GetJ() 
               && state1.GetParity()==state2.GetParity()){
-            double Ed = fabs(state1.GetEnergy()-state2.GetEnergy());
-            if(Ed<diff && Ed<limit && already.find(j)==already.end() ){
-              diff = Ed;
-              match = j;
+            if( state1.GetNumberOfOrbital()!=0 && state2.GetNumberOfOrbital()!=0
+               && state1.CumulativeSFDifference(state2)<1 ) {
+                double Ed = fabs(state1.GetEnergy()-state2.GetEnergy());
+                double Sd = state1.CumulativeSFDifference(state2);
+                if(Sd<diffS && Ed<diffE && Ed<limit && already.find(j)==already.end() ){
+                  diffE = Ed;
+                  diffS = Sd;
+                 match = j;
+                }
             }
           }
         }
@@ -91,6 +98,37 @@ std::vector< std::vector <unsigned int> > ShellModelCollection::MatchCollection(
       }
     }
   }
+
+  // second Pass, for case with no orbital info
+  for(unsigned int i = 0 ; i < size1 ; i++){
+    if(m_status[i]==status){
+      ShellModelState state1 = m_collection[i];
+      double diff = 100000;
+      unsigned int match=100000;
+      for(unsigned j = 0 ; j < size2 ; j++){
+        if(Collection.GetStatus(j)==status){
+          ShellModelState state2 = Collection.GetState(j);
+          if(state1.GetJ()==state2.GetJ() 
+              && state1.GetParity()==state2.GetParity()){
+            if( state1.GetNumberOfOrbital()==0 || state2.GetNumberOfOrbital()==0 ) {
+                double Ed = fabs(state1.GetEnergy()-state2.GetEnergy());
+                if(Ed<diff && Ed<limit && already.find(j)==already.end() ){
+                  diff = Ed;
+                 match = j;
+                }
+            }
+          }
+        }
+      }
+      if(match != 100000){
+        std::vector<unsigned int> l;
+        l.push_back(match);
+        already.insert(match);
+        resultat[i]=l;
+      }
+    }
+  }
+  
   return resultat;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -277,10 +315,21 @@ void ShellModelCollection::SelectStateByTotalSF(double threshold){
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
-void ShellModelCollection::SelectStateByTotalCS(double threshold){
+void ShellModelCollection::SelectStateByTotalCS(double threshold,double low, double up){
+  if(low < 0 || up < 0){
+    low = 0;
+    up = 180;
+  }
+
+  if(low<up){
+    double temp = up;
+    up = low;
+    low = temp;
+  }
+  
   unsigned int mysize = m_collection.size();
   for(unsigned int i = 0 ; i < mysize ; i++){
-    if(m_collection[i].GetTotalCS().Integrate()  > threshold){
+    if(m_collection[i].GetTotalCS().Integrate(low,up)  > threshold){
       // m_status[i] = 1;
     }
     else

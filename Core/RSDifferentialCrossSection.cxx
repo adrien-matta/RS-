@@ -24,6 +24,7 @@ void DifferentialCrossSection::LoadFromASCII(std::string filename){
     m_x.push_back(x);
     m_y.push_back(y);
   }
+  m_modified = true;
 }
 ////////////////////////////////////////////////////////////////////////////////
 void DifferentialCrossSection::LoadFromTWOFNR(std::string filename){
@@ -52,12 +53,13 @@ void DifferentialCrossSection::LoadFromTWOFNR(std::string filename){
     m_x.push_back(x);
     m_y.push_back(y);
   }
+
+  m_modified = true;
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 double DifferentialCrossSection::Integrate(double low, double up){
-
   if(low>up){
     double temp = low;
     low = up;
@@ -73,12 +75,10 @@ double DifferentialCrossSection::Integrate(double low, double up){
   }
   for(unsigned int i = 0 ; i < mysize ; i++){
     if(m_x[i]>low && m_x[i]< up){
-      if(m_x[i]>179) previous_x = 180;
       integral += m_y[i]*sin(m_x[i]*M_PI/180.)*2*M_PI*fabs(m_x[i]-previous_x)*M_PI/180.;
     }
     previous_x = m_x[i];
   }
-
   return integral;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +139,7 @@ TGraph* DifferentialCrossSection::GetTGraph(){
     m_g = new TGraph(m_x.size(),&m_x[0],&m_y[0]);
 
   else if(m_modified){
-    delete m_g;
+    //delete m_g;
     m_g = new TGraph(m_x.size(),&m_x[0],&m_y[0]);
     m_modified = false;
   }

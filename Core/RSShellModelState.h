@@ -32,18 +32,24 @@ namespace RS{
       int GetParity();
       int GetOrder();
       unsigned int GetNumberOfOrbital();
-      std::string GetOrbitalString(unsigned int i);
+      std::string GetOrbitalString(unsigned int i,std::string option="");
       unsigned int GetOrbitalN(unsigned int i);
       unsigned int GetOrbitalL(unsigned int i);
       double GetOrbitalJ(unsigned int i);
       double GetOrbitalS(unsigned int i);
-
+     
       DifferentialCrossSection GetTotalCS();
       DifferentialCrossSection GetOrbitalCS(unsigned int i);
-      std::vector<DifferentialCrossSection> GetAllOrbitalCS();
+      std::vector<DifferentialCrossSection> GetAllOrbitalCS(int limit =-1);
       
       unsigned int GetMainOrbital();
       double GetSumOfSForL(unsigned int l);
+      // Compute the difference in SF for two given state
+      // Used to Match state between collection
+      double CumulativeSFDifference(ShellModelState&);
+      
+      // Loop over the orbital and for each L keep the main orbital
+      void RemoveSecondaryLContribution();
 
       void Print();
   };
