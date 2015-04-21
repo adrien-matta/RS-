@@ -163,8 +163,7 @@ double RS::OverlapFunction::Integrate(double min, double max){
 
   for(size_t i = 0 ; i < mysize ; i++){
     if(i<mysize-1)
-      step = m_OverlapFunction_R[i]-m_OverlapFunction_R[i+1]; 
-
+      step = m_OverlapFunction_R[i+1]-m_OverlapFunction_R[i]; 
     inte += m_OverlapFunction_OL[i]*step;
 
   }
