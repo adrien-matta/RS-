@@ -274,7 +274,14 @@ void ShellModelCollection::LoadCollectionFromOxbash(unsigned int NumberOfStates,
           os >> buffer;
 
         for(unsigned j = 0 ; j < vn.size() ; j++){
-          os >> theSF;
+        
+          if(!(os >> theSF) && j!=vn.size()-1){// if not the end, look next line
+            getline(levelfile,LineBuffer); // get next line
+            os = std::istringstream(LineBuffer); // set the new content to stream
+            os >> theSF; // get the correct sf
+         }
+          
+          
           if(theSF>0)
             m_collection[offset+i].AddOrbital(vn[j],vl[j],vj[j]/2.,theSF);
         }
