@@ -25,7 +25,8 @@ namespace RS{
       std::vector<double> m_s;
 
     public:
-      void AddOrbital(unsigned int n, unsigned int l, double j, double s);
+      void AddOrbital(unsigned int n, unsigned int l, double j, double s, bool do_sort=true);
+
       double GetEnergy();
       void SetEnergy(double Energy);
       double GetJ();

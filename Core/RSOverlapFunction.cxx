@@ -100,6 +100,7 @@ void RS::OverlapFunction::Normalise(double norm){
 
   for(size_t i = 0 ; i < mysize ; i++){
     m_OverlapFunction_OL[i]=m_OverlapFunction_OL[i]*norm/inte;
+    m_OverlapFunction_E[i]=m_OverlapFunction_E[i]*abs(norm/inte);
   }
   m_modified=true;
 }
@@ -123,6 +124,8 @@ void RS::OverlapFunction::Divide(TGraph* g){
 
   for(size_t i = 0 ; i < mysize ; i++){
     m_OverlapFunction_OL[i]=m_OverlapFunction_OL[i]/g->Eval(m_OverlapFunction_R[i]);
+    m_OverlapFunction_E[i]=m_OverlapFunction_E[i]/abs(g->Eval(m_OverlapFunction_R[i]));
+
   }
   m_modified=true;
 }
@@ -132,6 +135,8 @@ void RS::OverlapFunction::Multiply(TF1* f){
 
   for(size_t i = 0 ; i < mysize ; i++){
     m_OverlapFunction_OL[i]*=f->Eval(m_OverlapFunction_R[i]);
+    m_OverlapFunction_E[i]*=abs(f->Eval(m_OverlapFunction_R[i]));
+
   }
   m_modified=true;
 
@@ -282,7 +287,7 @@ RS::OverlapFunction RS::OverlapFunction::FitWithOverlap(std::vector<RS::OverlapF
     Th[i].Scale(xs[i]);
     OL+=Th[i];
   }
-  
+
   mysize = m_ThConstant.size();
   for(unsigned int i = 0 ; i < mysize ; i++){
     OL+=m_ThConstant[i];

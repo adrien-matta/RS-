@@ -49,10 +49,10 @@ int ShellModelState::GetOrder(){
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ShellModelState::AddOrbital(unsigned int n, unsigned int l, double j, double s){
+void ShellModelState::AddOrbital(unsigned int n, unsigned int l, double j, double s,bool do_sort){
   // Guarantee that the orbital list is by SF ordering importance (biggest SF first)
 
-  if(!m_n.empty()){
+  if(!m_n.empty() && do_sort){
     std::vector<unsigned int>::iterator it_n = m_n.begin();;
     std::vector<unsigned int>::iterator it_l = m_l.begin();;
     std::vector<double>::iterator it_j = m_j.begin();
