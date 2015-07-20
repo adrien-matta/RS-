@@ -104,12 +104,17 @@ std::string ShellModelState::GetOrbitalString(unsigned int i,std::string option)
   else if(m_l[i]==7) shell ="j";
   else if(m_l[i]==8) shell ="k";
 
-  if(option=="")
-    os << m_n[i] << shell << (m_j[i]*2) << "/2";
+  
+  int n = m_n[i];
+  if(option.find("SM")!=std::string::npos)
+    n--;
 
-  else if(option=="latex")
-    os << m_n[i] << shell <<"$_{" << (m_j[i]*2) << "/2}$";
+  if(option.find("latex")!=std::string::npos)
+   os << n << shell <<"$_{" << (m_j[i]*2) << "/2}$";
 
+  else
+    os << n << shell << (m_j[i]*2) << "/2";
+ 
 
   return os.str();
 }
