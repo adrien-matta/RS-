@@ -32,28 +32,71 @@ unsigned int ShellModelCollection::GetStatus(unsigned int i){
   return m_status[i];
 }
 ////////////////////////////////////////////////////////////////////////////////
+void ShellModelCollection::LoadCollectionFromNushell(std::string FileName){
+  std::ifstream File(FileName.c_str());
+  std::string LineBuffer;
+  while(getline(File,LineBuffer)){
+    // start of new block
+    if(LineBuffer.compare(0,10,"( Ai  Tzi)")==0){
+      // Get the next line
+      while(getline(File,LineBuffer)){
+        // end of block
+        if(LineBuffer.find("sum")!=std::string::npos)
+          break;
+        else{
+          int n,l,j,order;
+          double E,J, P, S;
+          std::string  buffer;
+
+          std::istringstream line(LineBuffer);
+          line >> buffer >> buffer >> buffer ;//  ( 28  2.0)  
+          line >> buffer >> buffer >> buffer ;//  ( 29  2.5)  
+          line >> buffer >> buffer  >> n >> l >> buffer;//  ( n  2 0  1) 
+          buffer = buffer.substr(0,buffer.length()-1);
+          j = std::atoi(buffer.c_str());
+          line >> buffer   ;//  0.0+  
+          line >> J >> buffer     ;//  0.5+     
+          if(buffer == "+") P =1;
+          else P=-1;
+          line >> buffer ;//  1    
+          line >> order     ;//  1   
+          line >> S    ;//  0.3966  
+          line >> buffer >> buffer     ;//  -265.061  -268.637   
+          line >> buffer    ;//  -1.418    
+          line >> buffer     ;//  0.000    
+          line >> E    ;//  0.000
+          ShellModelState state(E,J,P,order);
+          state.AddOrbital(n,l,j*0.5,S);
+        }
+      }
+    }
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
 void ShellModelCollection::LoadCollectionFromSimpleFile(std::string FileName){
   std::ifstream File(FileName.c_str());
   std::string LineBuffer;
   while(getline(File,LineBuffer)){
-    std::istringstream line(LineBuffer);
-    double E,J;
-    line >> E >> J;
-    int P;
-    if(J>0) P =1 ;
-    else{
-      J=-J;
-      P=-1;
-    }
+    if(LineBuffer.compare(0,1,"%")!=0){
+      std::istringstream line(LineBuffer);
+      double E,J;
+      line >> E >> J;
+      int P;
+      if(J>0) P =1 ;
+      else{
+        J=-J;
+        P=-1;
+      }
 
-    ShellModelState state(E,J,P,0);
-    int n,l;
-    double j,s; 
-    while(line >> n >> l >> j >> s){
-      state.AddOrbital(n,l,j,s);
-    }
+      ShellModelState state(E,J,P,0);
+      int n,l;
+      double j,s; 
+      while(line >> n >> l >> j >> s){
+        state.AddOrbital(n,l,j,s);
+      }
 
-    AddState(state);
+      AddState(state);
+    }
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,14 +121,14 @@ std::vector< std::vector <unsigned int> > ShellModelCollection::MatchCollection(
           if(state1.GetJ()==state2.GetJ() 
               && state1.GetParity()==state2.GetParity()){
             if( state1.GetNumberOfOrbital()!=0 && state2.GetNumberOfOrbital()!=0
-               && state1.CumulativeSFDifference(state2)<1 ) {
-                double Ed = fabs(state1.GetEnergy()-state2.GetEnergy());
-                double Sd = state1.CumulativeSFDifference(state2);
-                if(Sd<diffS && Ed<diffE && Ed<limit && already.find(j)==already.end() ){
-                  diffE = Ed;
-                  diffS = Sd;
-                 match = j;
-                }
+                && state1.CumulativeSFDifference(state2)<1 ) {
+              double Ed = fabs(state1.GetEnergy()-state2.GetEnergy());
+              double Sd = state1.CumulativeSFDifference(state2);
+              if(Sd<diffS && Ed<diffE && Ed<limit && already.find(j)==already.end() ){
+                diffE = Ed;
+                diffS = Sd;
+                match = j;
+              }
             }
           }
         }
@@ -111,11 +154,11 @@ std::vector< std::vector <unsigned int> > ShellModelCollection::MatchCollection(
           if(state1.GetJ()==state2.GetJ() 
               && state1.GetParity()==state2.GetParity()){
             if( state1.GetNumberOfOrbital()==0 || state2.GetNumberOfOrbital()==0 ) {
-                double Ed = fabs(state1.GetEnergy()-state2.GetEnergy());
-                if(Ed<diff && Ed<limit && already.find(j)==already.end() ){
-                  diff = Ed;
-                 match = j;
-                }
+              double Ed = fabs(state1.GetEnergy()-state2.GetEnergy());
+              if(Ed<diff && Ed<limit && already.find(j)==already.end() ){
+                diff = Ed;
+                match = j;
+              }
             }
           }
         }
@@ -128,7 +171,7 @@ std::vector< std::vector <unsigned int> > ShellModelCollection::MatchCollection(
       }
     }
   }
-  
+
   return resultat;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -274,14 +317,14 @@ void ShellModelCollection::LoadCollectionFromOxbash(unsigned int NumberOfStates,
           os >> buffer;
 
         for(unsigned j = 0 ; j < vn.size() ; j++){
-        
+
           if(!(os >> theSF) && j!=vn.size()-1){// if not the end, look next line
             getline(levelfile,LineBuffer); // get next line
             os = std::istringstream(LineBuffer); // set the new content to stream
             os >> theSF; // get the correct sf
-         }
-          
-          
+          }
+
+
           if(theSF>0)
             m_collection[offset+i].AddOrbital(vn[j],vl[j],vj[j]/2.,theSF);
         }
@@ -333,7 +376,7 @@ void ShellModelCollection::SelectStateByTotalCS(double threshold,double low, dou
     up = low;
     low = temp;
   }
-  
+
   unsigned int mysize = m_collection.size();
   for(unsigned int i = 0 ; i < mysize ; i++){
     if(m_collection[i].GetTotalCS().Integrate(low,up)  > threshold){

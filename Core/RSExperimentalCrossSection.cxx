@@ -145,7 +145,7 @@ DifferentialCrossSection ExperimentalCrossSection::FindNormalisation(std::vector
     parameter[i] = Norm[i];
     char name[4];
     sprintf(name,"S%d",i+1);
-    min->SetLimitedVariable(i,name,parameter[i],0.1,0,100);
+    min->SetLimitedVariable(i,name,0.5,0.1,0,1);
   }
   
   // do the minimization
