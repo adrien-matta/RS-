@@ -15,7 +15,7 @@ RS::CollectionMinimiser::~CollectionMinimiser(){
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-double RS::CollectionMinimiser::Minimise(std::vector<TGraphErrors*> Collection, std::vector< std::vector<TGraph*> > Bases, std::vector<double>& param, std::vector<double>& err, double lmin, double lmax){
+double RS::CollectionMinimiser::Minimise(std::vector<TGraphErrors*> Collection, std::vector< std::vector<TGraph*> > Bases, std::vector<double>& param,std::vector<bool>& fix, std::vector<double>& err, double lmin, double lmax){
   m_Collection = Collection;
   m_Bases = Bases;
   if(lmin<lmax){
@@ -51,6 +51,7 @@ double RS::CollectionMinimiser::Minimise(std::vector<TGraphErrors*> Collection, 
   }
   // Resize the parameter and error
   param.resize(base_size,1);
+  fix.resize(base_size,false);
   err.resize(base_size,0);
 
   const char* minName ="Minuit2";const char* algoName="Combined";
@@ -69,7 +70,10 @@ double RS::CollectionMinimiser::Minimise(std::vector<TGraphErrors*> Collection, 
     char name[4];
     sprintf(name,"V%d",i+1);
 
+    if(fix[i]==false)
       min->SetVariable(i,name,parameter[i],100);
+    else
+      min->SetFixedVariable(i,name,parameter[i]);    
  
   }
   // do the minimization

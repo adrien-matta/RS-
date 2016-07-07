@@ -31,6 +31,8 @@ void RS::OverlapFunction::LoadFromFile(std::string filename){
   m_OverlapFunction_R.clear();
   m_OverlapFunction_OL.clear();
   m_OverlapFunction_E.clear();
+  m_Graph=0;
+  m_modified=false;
 
   std::ifstream infile(filename.c_str());
   if(!infile.is_open()){
@@ -50,7 +52,6 @@ void RS::OverlapFunction::LoadFromFile(std::string filename){
   double r,OL,e;
   if(column==2)
     while(infile >> r >> OL){
-
       m_OverlapFunction_R.push_back(r);
       m_OverlapFunction_OL.push_back(OL);
       m_OverlapFunction_E.push_back(0);
@@ -64,12 +65,11 @@ void RS::OverlapFunction::LoadFromFile(std::string filename){
       m_OverlapFunction_E.push_back(e);
     }
 
+
   else{
     std::cout << "Error : Wrong number of column in Overlap File : " << filename << std::endl;
     exit(1);
   }
-
-
   Sort();
 }
 ////////////////////////////////////////////////////////////////////////////////

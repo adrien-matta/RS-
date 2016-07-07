@@ -13,7 +13,7 @@ namespace RS{
       ~CollectionMinimiser();
 
     public:
-      double Minimise(std::vector<TGraphErrors*> Collection, std::vector< std::vector<TGraph*> > Bases, std::vector<double>& param, std::vector<double>& err, double lmin=-1, double lmax=-1);
+      double Minimise(std::vector<TGraphErrors*> Collection, std::vector< std::vector<TGraph*> > Bases, std::vector<double>& param,std::vector<bool>& fix, std::vector<double>& err, double lmin=-1, double lmax=-1);
       double ComputeOverallChi2(const double* param);
       double ComputeOneChi2(unsigned int i, const double* param);
 
